@@ -1,0 +1,9 @@
+﻿@model IEnumerable<Employee>
+@{
+    ViewData["Title"] = "Index";
+    var name = Model.ElementAt(1).Name;
+}
+
+<h1>Index</h1>
+<h3>@name</h3>
+
