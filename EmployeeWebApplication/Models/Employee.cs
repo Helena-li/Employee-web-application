@@ -16,11 +16,11 @@ namespace EmployeeWebApplication.Models
         [RegularExpression(@"^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9-.]+$",
             ErrorMessage = "Invalid Email Format")] 
         public string Email { get; set; }
-        public Department Department { get; set; }
+        public Dept Department { get; set; }
         public string PhotoPath { get; set; }
     }
 
-    public enum Department
+    public enum Dept
     {
         None,
         IT,
