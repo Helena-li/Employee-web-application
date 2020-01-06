@@ -44,8 +44,8 @@ namespace EmployeeWebApplication
                             .AddDefaultTokenProviders();
             services.AddAuthentication().AddGoogle(option =>
             {
-                option.ClientId = "597035172561-c50s2qu28fj78tl1lmivb6v8tpsr9qta.apps.googleusercontent.com";
-                option.ClientSecret = "vGIslMG3NOGqcLKdc8uwmu-n";
+                option.ClientId = "926758641945-kps0kt3vt33i72tga4ntte6bu975gdfe.apps.googleusercontent.com";
+                option.ClientSecret = "1oD57l05FDRL1vfwCE4TI17S";
                 option.UserInformationEndpoint = "https://www.googleapis.com/oauth2/v2/userinfo";
                 option.ClaimActions.Clear();
                 option.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
