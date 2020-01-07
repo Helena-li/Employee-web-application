@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using EmployeeWebApplication.Models;
+using EmployeeWebApplication.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -59,6 +60,12 @@ namespace EmployeeWebApplication
             {
                 option.ClientId = "2453599471557470";
                 option.ClientSecret = "1a357d1a6d9a0687f16ebda2aaaaaae5";
+            });
+
+            services.AddAuthorization(option =>
+            {
+                option.AddPolicy("EditRepository",
+                    policy => policy.AddRequirements(new ManageAdminRolesAndClaimsRequirement()));
             });
         }
 

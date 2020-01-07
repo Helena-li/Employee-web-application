@@ -134,7 +134,6 @@ namespace EmployeeWebApplication.Controllers
             }
             return View();
         }
-
         
         public IActionResult Delete(int id)
         {
