@@ -214,7 +214,7 @@ namespace EmployeeWebApplication.Controllers
             }
         }
 
-        [HttpPost]
+        
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();
@@ -309,6 +309,42 @@ namespace EmployeeWebApplication.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return RedirectToAction("Login");
+                }
+                var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword,
+                    model.NewPassword);
+                if (!result.Succeeded)
+                {
+                    foreach (var item in result.Errors)
+                    {
+                        ModelState.AddModelError("", item.Description);
+                    }
+                    return View();
+                }
+               
+                return View("ChangePasswordConfirm");
+            }
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult ChangePasswordConfirm()
+        {
+            return View();
+        }
     }
 }

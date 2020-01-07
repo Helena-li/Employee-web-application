@@ -30,12 +30,21 @@
                 <ul class="navbar-nav ml-auto">
                     @if (signInManager.IsSignedIn(User))
                     {
-                        <li class="nav-item">
-                            <form method="post" asp-action="logout" asp-controller="account">
-                                <button type="submit" class="nav-link btn btn-link py-0" style="width:auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLinkPro"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Manage Profile
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkPro">
+                                <a asp-action="ChangePassword" asp-controller="account"
+                                   class="dropdown-item">
+                                    Change Password
+                                </a>
+                                <a asp-action="logout" asp-controller="account"
+                                   class="dropdown-item">
                                     logout @User.Identity.Name
-                                </button>
-                            </form>
+                                </a>
+                            </div>
                         </li>
                     }
                     else
@@ -54,7 +63,7 @@
     </div>
     @if (IsSectionDefined("Scripts"))
     {
-        @RenderSection("Scripts", required:true)
+        @RenderSection("Scripts", required: true)
     }
 </body>
 </html>
