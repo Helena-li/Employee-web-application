@@ -20,19 +20,9 @@
             <div class="card-footer text-center">
                 <a asp-controller="home" asp-action="index" class="btn btn-primary">Back</a>
                 <a asp-action="edit" asp-controller="home" asp-route-id="@Model.Employee.Id" class="btn btn-primary">Edit</a>
-                <a href="#" class="btn btn-danger">Delete</a>
+                <a asp-action="delete" asp-controller="home" asp-route-id="@Model.Employee.Id" class="btn btn-danger m-1">Delete</a>
             </div>
         </div>
     </div>
 </div>
-<form method="post" class="mt-3" asp-controller="home" asp-action="export" asp-route-id="@Model.Employee.Id">
-    <input hidden asp-for="Employee.Id" />
-    <input hidden asp-for="Employee.Email" />
-    <input hidden asp-for="Employee.Department" />
-    <input hidden asp-for="Employee.Name" />
-    <input hidden asp-for="Employee.PhotoPath" />
-    <input hidden asp-for="Title" />
-    <div class="ml-auto">
-        <button type="submit" class="btn btn-primary m-1">Export</button>
-    </div>
-</form>
+

@@ -16,3 +16,7 @@
     right: 0;
     bottom: 0;
 }
+.imageFormat {
+    width: auto;
+    height: 300px;
+}

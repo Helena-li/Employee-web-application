@@ -13,14 +13,14 @@ namespace EmployeeWebApplication.Models
         {
             this.context = context;
         }
-        public Employee AddEmployee(Employee employee)
+        public Employee Add(Employee employee)
         {
             context.Employees.Add(employee);
             context.SaveChanges();
             return employee;
         }
 
-        public Employee DeleteEmployee(int id)
+        public Employee Delete(int id)
         {
             var emp = context.Employees.Find(id);
             if (emp!=null)
@@ -41,7 +41,7 @@ namespace EmployeeWebApplication.Models
             return context.Employees;
         }
 
-        public Employee UpdateEmployee(Employee employee)
+        public Employee Update(Employee employee)
         {
             var emp = context.Employees.Attach(employee);
             emp.State = Microsoft.EntityFrameworkCore.EntityState.Modified;
