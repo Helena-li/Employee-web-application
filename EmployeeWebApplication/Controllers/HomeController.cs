@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using EmployeeWebApplication.Models;
+using EmployeeWebApplication.Security;
 using EmployeeWebApplication.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,30 +21,40 @@ namespace EmployeeWebApplication.Controllers
         private readonly IEmployeeRepository _employeeRepository;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IHostingEnvironment hostingEnvironment;
+        private readonly IDataProtector protector;
 
         public HomeController(IEmployeeRepository employeeRepository,
             SignInManager<ApplicationUser> signInManager
-            , IHostingEnvironment hostingEnvironment)
+            , IHostingEnvironment hostingEnvironment,
+            IDataProtectionProvider dataProtectionProvider,
+            DataProtectionPurposeString dataProtectionPurposeString)
         {
             this._employeeRepository = employeeRepository;
             this.signInManager = signInManager;
             this.hostingEnvironment = hostingEnvironment;
+            protector = dataProtectionProvider.CreateProtector(dataProtectionPurposeString
+                .EmployeeIdRouteValue);
         }
 
         [AllowAnonymous]
         public IActionResult Index()
         {
-            var model = _employeeRepository.GetEmployeeList();
+            var model = _employeeRepository.GetEmployeeList().Select(x =>
+            {
+                x.EncryptedId = protector.Protect(x.Id.ToString());
+                return x;
+            });
             return View(model);
         }
 
-        public ViewResult Details(int id)
+        public ViewResult Details(string id)
         {
-            var employee = _employeeRepository.GetEmployee(id);
+            var decryptedId = Convert.ToInt32(protector.Unprotect(id));
+            var employee = _employeeRepository.GetEmployee(decryptedId);
             if (employee == null)
             {
                 Response.StatusCode = 404;
-                return View("EmployeeNotFound", id);
+                return View("EmployeeNotFound", decryptedId);
             }
             HomeDetailViewModels homeDetailViewModels = new HomeDetailViewModels()
             {

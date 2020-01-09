@@ -72,6 +72,8 @@ namespace EmployeeWebApplication
             {
                 option.AccessDeniedPath = new PathString("/admin/AccessDenied");
             });
+
+            services.AddSingleton<DataProtectionPurposeString>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
