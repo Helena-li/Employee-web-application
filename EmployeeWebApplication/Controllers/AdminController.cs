@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using EmployeeWebApplication.Models;
 using EmployeeWebApplication.ViewModels;
@@ -22,6 +23,7 @@ namespace EmployeeWebApplication.Controllers
             this.userManager = userManager;
         }
 
+        #region role
         [HttpGet]
         public IActionResult ListRole()
         {
@@ -219,13 +221,225 @@ namespace EmployeeWebApplication.Controllers
                 }
             }
         }
-
+        #endregion
 
         [HttpGet]
         public IActionResult ListUsers()
         {
             var result = userManager.Users;
             return View(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditUser(string id)
+        {
+            var user = await userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"role with id = {id} is not found";
+                return RedirectToAction("NotFound");
+            }
+            else
+            {
+                var userRoles = await userManager.GetRolesAsync(user);
+                var userClaims = await userManager.GetClaimsAsync(user);
+                EditUserViewModel model = new EditUserViewModel
+                {
+                    Id = id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    City = user.City,
+                    Claims = userClaims.Select(x => x.Type + " : " + x.Value).ToList(),
+                    Roles = userRoles
+                };
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUser(EditUserViewModel model)
+        {
+            var user = await userManager.FindByIdAsync(model.Id);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"role with id = {model.Id} is not found";
+                return RedirectToAction("NotFound");
+            }
+            else
+            {
+                user.UserName = model.UserName;
+                user.Email = model.Email;
+                user.City = model.City;
+
+                var result = await userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("listusers", "admin");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    return View(model);
+                }
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ManageUserRoles(string userId)
+        {
+            ViewBag.UserId = userId;
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"role with id = {userId} is not found";
+                return RedirectToAction("NotFound");
+            }
+            else
+            {
+                ViewBag.UserName = user.UserName;
+                var model = new List<UserRolesViewModel>();
+                foreach (var role in roleManager.Roles)
+                {
+                    UserRolesViewModel userRoleViewModel = new UserRolesViewModel
+                    {
+                        RoleId = role.Id,
+                        RoleName = role.Name
+                    };
+                    if (await userManager.IsInRoleAsync(user, role.Name))
+                    {
+                        userRoleViewModel.IsSelected = true;
+                    }
+                    else
+                    {
+                        userRoleViewModel.IsSelected = false;
+                    }
+                    model.Add(userRoleViewModel);
+                }
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ManageUserRoles(List<UserRolesViewModel> model, string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"role with id = {userId} is not found";
+                return RedirectToAction("NotFound", "home");
+            }
+            else
+            {
+                var roles = await userManager.GetRolesAsync(user);
+                var result = await userManager.RemoveFromRolesAsync(user, roles);
+                if (!result.Succeeded)
+                {
+                    ModelState.AddModelError("", "Cannot remove roles");
+                    return View(model);
+                }
+                result = await userManager.AddToRolesAsync(user,
+                    model.Where(x => x.IsSelected).Select(y => y.RoleName));
+                if (!result.Succeeded)
+                {
+                    ModelState.AddModelError("", "Cannot add roles");
+                    return View(model);
+                }
+                return RedirectToAction("EditUser", new { Id = userId });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ManageUserClaims(string userId)
+        {
+            ViewBag.UserId = userId;
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"role with id = {userId} is not found";
+                return RedirectToAction("NotFound");
+            }
+            else
+            {
+                var model = new UserClaimsViewModel
+                {
+                    UserId = userId
+                };
+                var claims = await userManager.GetClaimsAsync(user);
+
+                foreach (Claim claim in ClaimsStore.AllClaims)
+                {
+                    UserClaim userClaim = new UserClaim
+                    {
+                        ClaimType = claim.Type
+                    };
+                    if (claims.Any(x => x.Type == claim.Type && x.Value == "true"))
+                    {
+                        userClaim.IsSelected = true;
+                    }
+                    model.Claims.Add(userClaim);
+                }
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ManageUserClaims(UserClaimsViewModel model)
+        {
+            var user = await userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"role with id = {model.UserId} is not found";
+                return RedirectToAction("NotFound", "home");
+            }
+            else
+            {
+                var roles = await userManager.GetClaimsAsync(user);
+                var result = await userManager.RemoveClaimsAsync(user, roles);
+                if (!result.Succeeded)
+                {
+                    ModelState.AddModelError("", "Cannot remove roles");
+                    return View(model);
+                }
+                result = await userManager.AddClaimsAsync(user,
+                    model.Claims
+                    .Select(y => new Claim(y.ClaimType, y.IsSelected ? "true" : "false")));
+                if (!result.Succeeded)
+                {
+                    ModelState.AddModelError("", "Cannot add roles");
+                    return View(model);
+                }
+                return RedirectToAction("EditUser", new { Id = model.UserId });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var user = await userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"role with id = {id} is not found";
+                return RedirectToAction("NotFound");
+            }
+            else
+            {
+                var result = await userManager.DeleteAsync(user);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("listusers", "admin");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    return View(result);
+                }
+            }
         }
 
     }
