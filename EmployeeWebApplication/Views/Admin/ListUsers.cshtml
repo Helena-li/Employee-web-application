@@ -1,4 +1,6 @@
 ﻿@model IEnumerable<ApplicationUser>
+@using Microsoft.AspNetCore.Authorization;
+@inject IAuthorizationService authorizationService
 
 @{
     ViewBag.Title = "List Users";
@@ -20,9 +22,13 @@
             </div>
             <div class="card-footer">
                 <form method="post" asp-action="deleteuser" asp-route-id="@user.Id">
-                    <a asp-action="edituser" asp-controller="admin" asp-route-id="@user.Id" class="btn btn-primary" style="width:auto">
-                        Edit
-                    </a>
+                    @if ((await authorizationService.AuthorizeAsync(User, "EditRepository")).Succeeded)
+                    {
+                        <a asp-action="edituser" asp-controller="admin" asp-route-id="@user.Id" class="btn btn-primary" style="width:auto">
+                            Edit
+                        </a>
+                    }
+
                     <span id="ClickDelete_@user.Id">
                         <a href="#" class="btn btn-danger" style="width:auto"
                            onclick="confirmDelete('@user.Id', true)">

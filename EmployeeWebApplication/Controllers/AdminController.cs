@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using EmployeeWebApplication.Models;
 using EmployeeWebApplication.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -231,6 +232,7 @@ namespace EmployeeWebApplication.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "EditRepository")]
         public async Task<IActionResult> EditUser(string id)
         {
             var user = await userManager.FindByIdAsync(id);
@@ -257,6 +259,7 @@ namespace EmployeeWebApplication.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "EditRepository")]
         public async Task<IActionResult> EditUser(EditUserViewModel model)
         {
             var user = await userManager.FindByIdAsync(model.Id);
@@ -442,5 +445,10 @@ namespace EmployeeWebApplication.Controllers
             }
         }
 
+        [HttpGet]
+        public ViewResult AccessDenied()
+        {
+            return View();
+        }
     }
 }

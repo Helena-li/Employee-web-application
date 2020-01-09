@@ -67,6 +67,11 @@ namespace EmployeeWebApplication
                 option.AddPolicy("EditRepository",
                     policy => policy.AddRequirements(new ManageAdminRolesAndClaimsRequirement()));
             });
+            services.AddSingleton<IAuthorizationHandler, CanEditOnlyOhterAdminRolesAndClaimsHandler>();
+            services.ConfigureApplicationCookie(option =>
+            {
+                option.AccessDeniedPath = new PathString("/admin/AccessDenied");
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
