@@ -29,7 +29,12 @@ namespace EmployeeWebApplication.Controllers
             return View(result);
         }
 
-        
+        [HttpGet]
+        public IActionResult ListUsers()
+        {
+            var result = userManager.Users;
+            return View(result);
+        }
 
     }
 }
