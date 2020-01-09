@@ -193,6 +193,33 @@ namespace EmployeeWebApplication.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> DeleteRole(string id)
+        {
+            var role = await roleManager.FindByIdAsync(id);
+            if (role == null)
+            {
+                ViewBag.ErrorMessage = $"role with id = {id} is not found";
+                return RedirectToAction("NotFound");
+            }
+            else
+            {
+                var result = await roleManager.DeleteAsync(role);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("listrole", "admin");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    return RedirectToAction("listrole", "admin");
+                }
+            }
+        }
+
 
         [HttpGet]
         public IActionResult ListUsers()
