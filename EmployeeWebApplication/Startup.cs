@@ -45,8 +45,8 @@ namespace EmployeeWebApplication
                             .AddDefaultTokenProviders();
             services.AddAuthentication().AddGoogle(option =>
             {
-                option.ClientId = "926758641945-kps0kt3vt33i72tga4ntte6bu975gdfe.apps.googleusercontent.com";
-                option.ClientSecret = "1oD57l05FDRL1vfwCE4TI17S";
+                option.ClientId = "***";
+                option.ClientSecret = "***";
                 option.UserInformationEndpoint = "https://www.googleapis.com/oauth2/v2/userinfo";
                 option.ClaimActions.Clear();
                 option.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
@@ -58,8 +58,8 @@ namespace EmployeeWebApplication
             })
             .AddFacebook(option =>
             {
-                option.ClientId = "2453599471557470";
-                option.ClientSecret = "1a357d1a6d9a0687f16ebda2aaaaaae5";
+                option.ClientId = "***";
+                option.ClientSecret = "***";
             });
 
             services.AddAuthorization(option =>
