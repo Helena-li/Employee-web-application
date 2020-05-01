@@ -16,17 +16,21 @@ namespace EmployeeWebApplication.Controllers
 {
     public class AccountController : Controller
     {
+       
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly ILogger<AccountController> logger;
+        private readonly IEmailService emailService;
 
         public AccountController(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            IEmailService emailService)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.logger = logger;
+            this.emailService = emailService;
         }
 
         [HttpGet]
@@ -56,6 +60,14 @@ namespace EmployeeWebApplication.Controllers
                         new { userId = user.Id, token = token }, Request.Scheme);
                     logger.Log(LogLevel.Warning, confirmationLink);
 
+                    var dynamicTemplateData = new TemplateEmailData
+                    {
+                        Subject = "send grid dynamic",
+                        Name = "Linda",
+                        RedirectUrl = "https://localhost:44356/account/login"
+                    };
+                    emailService.SendEmail(dynamicTemplateData);
+
                     if (signInManager.IsSignedIn(User) && User.IsInRole("admin"))
                     {
                         return RedirectToAction("listusers", "admin");
@@ -70,7 +82,7 @@ namespace EmployeeWebApplication.Controllers
                 }
             }
             return View(model);
-        }
+        }        
 
         [AcceptVerbs("Get", "Post")]
         [AllowAnonymous]
@@ -346,5 +358,6 @@ namespace EmployeeWebApplication.Controllers
         {
             return View();
         }
+
     }
 }

@@ -74,6 +74,7 @@ namespace EmployeeWebApplication
             });
 
             services.AddSingleton<DataProtectionPurposeString>();
+            services.AddScoped<IEmailService, EmailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
