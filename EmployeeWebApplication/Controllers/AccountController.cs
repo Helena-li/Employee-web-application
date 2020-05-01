@@ -60,11 +60,17 @@ namespace EmployeeWebApplication.Controllers
                         new { userId = user.Id, token = token }, Request.Scheme);
                     logger.Log(LogLevel.Warning, confirmationLink);
 
+                    List<Location> locations = new List<Location>();
+                    locations.Add(new Location { City = "London", Country = "UK" });
+                    locations.Add(new Location { City = "London", Country = "UK" });
+                    locations.Add(new Location { City = "London", Country = "UK" });
+
                     var dynamicTemplateData = new TemplateEmailData
                     {
                         Subject = "send grid dynamic",
                         Name = "Linda",
-                        RedirectUrl = "https://localhost:44356/account/login"
+                        RedirectUrl = "https://localhost:44356/account/",
+                        Locations = locations
                     };
                     emailService.SendEmail(dynamicTemplateData);
 

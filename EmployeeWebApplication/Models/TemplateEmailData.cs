@@ -14,6 +14,8 @@ namespace EmployeeWebApplication.Models
         public string Name { get; set; }
         [JsonProperty("redirect")]
         public string RedirectUrl { get; set; }
+        [JsonProperty("location")]
+        public List<Location> Locations { get; set; }
     }
     public class Location
     {
