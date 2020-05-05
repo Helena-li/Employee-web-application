@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using EmployeeWebApplication.Models;
 using EmployeeWebApplication.Security;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,6 +17,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EmployeeWebApplication
 {
@@ -30,12 +33,28 @@ namespace EmployeeWebApplication
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowWebAppAccess", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials()
+                    .Build();
+                });
+            });
+
             services.AddMvc(config =>
             {
                 var policy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
                 .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
+            }).AddJsonOptions(options =>
+            {
+                options.SerializerSettings.ContractResolver
+                    = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
             });
             services.AddDbContextPool<AppDbContext>(options => options.UseSqlServer(_config.GetConnectionString("EmployeeDBConnection")));
             services.AddScoped<IEmployeeRepository, SqlEmployeeRepository>();
@@ -75,6 +94,8 @@ namespace EmployeeWebApplication
 
             services.AddSingleton<DataProtectionPurposeString>();
             services.AddScoped<IEmailService, EmailService>();
+
+            services.AddJwt(_config);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -89,8 +110,9 @@ namespace EmployeeWebApplication
                 app.UseExceptionHandler("/Error");
                 app.UseStatusCodePagesWithReExecute("/Error/{0}");
             }
-
             app.UseStaticFiles();
+            app.UseCors("AllowWebAppAccess");
+            
             app.UseAuthentication();
             app.UseMvc(routes => {
                 routes.MapRoute("default", "{controller=home}/{action=index}/{id?}");

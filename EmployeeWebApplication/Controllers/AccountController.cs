@@ -21,16 +21,19 @@ namespace EmployeeWebApplication.Controllers
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly ILogger<AccountController> logger;
         private readonly IEmailService emailService;
+        private IJwtHandler _jwtHandler;
 
         public AccountController(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             ILogger<AccountController> logger,
+            IJwtHandler jwtHandler,
             IEmailService emailService)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.logger = logger;
             this.emailService = emailService;
+            _jwtHandler = jwtHandler;
         }
 
         [HttpGet]
@@ -55,11 +58,18 @@ namespace EmployeeWebApplication.Controllers
                 var result = await userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    // use user manager to generate token and save in sql
                     var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
                     var confirmationLink = Url.Action("ConfirmEmail", "Account",
                         new { userId = user.Id, token = token }, Request.Scheme);
                     logger.Log(LogLevel.Warning, confirmationLink);
 
+                    // use jwt to generat token
+                    var UId = Guid.NewGuid().ToString();
+                    var jwtToken = _jwtHandler.Create(UId, "Employer", false);
+                    var JWT = jwtToken.Token;
+
+                    // send email to the register
                     List<Location> locations = new List<Location>();
                     locations.Add(new Location { City = "London", Country = "UK" });
                     locations.Add(new Location { City = "London", Country = "UK" });
@@ -67,9 +77,9 @@ namespace EmployeeWebApplication.Controllers
 
                     var dynamicTemplateData = new TemplateEmailData
                     {
-                        Subject = "send grid dynamic",
+                        Subject = "jwt valid",
                         Name = "Linda",
-                        RedirectUrl = "https://localhost:44356/account/",
+                        RedirectUrl = $"https://localhost:44356/Account/JwtValidation?token={JWT}",
                         Locations = locations
                     };
                     emailService.SendEmail(dynamicTemplateData);
@@ -88,7 +98,19 @@ namespace EmployeeWebApplication.Controllers
                 }
             }
             return View(model);
-        }        
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult JwtValidation(string token)
+        {
+            var tokenValidation = _jwtHandler.ValidateToken(token);
+            if (tokenValidation==null)
+            {
+                return View("Error");
+            }
+            return RedirectToAction("ConfirmEmail");
+        }
 
         [AcceptVerbs("Get", "Post")]
         [AllowAnonymous]

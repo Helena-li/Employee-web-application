@@ -9,8 +9,8 @@ namespace EmployeeWebApplication.Models
 {
     public class EmailService : IEmailService
     {
-        private static string SendGridApiKey = "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";
-        private static string TryTemplate = "d-8ea7633ca68c4b16832578595d039743";
+        private static string SendGridApiKey = "My send grid key";
+        private static string TryTemplate = "my template id";
 
         public async void SendEmail(TemplateEmailData templateEmailData)
         {
@@ -18,8 +18,8 @@ namespace EmployeeWebApplication.Models
             {
                 var client = new SendGridClient(SendGridApiKey);
                 var msg = new SendGridMessage();
-                msg.SetFrom(new EmailAddress("lihuiling987@gmail.com", "Linda"));
-                msg.AddTo(new EmailAddress("lihuiling987@gmail.com", "Linda"));
+                msg.SetFrom(new EmailAddress("test@gmail.com", "L"));
+                msg.AddTo(new EmailAddress("test@gmail.com", "new"));
                 msg.SetTemplateId(TryTemplate);
 
                 msg.SetTemplateData(templateEmailData);
